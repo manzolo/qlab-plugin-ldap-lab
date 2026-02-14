@@ -376,9 +376,12 @@ write_files:
 runcmd:
   - netplan apply
   - |
-    # Configure Apache for phpLDAPadmin — allow access from any IP
+    # Configure phpLDAPadmin
     if [ -f /etc/phpldapadmin/config.php ]; then
+      # Allow access from any host
       sed -i "s|\$servers->setValue('server','host','127.0.0.1');|\$servers->setValue('server','host','localhost');|" /etc/phpldapadmin/config.php
+      # Set correct base DN and admin bind DN
+      sed -i "s/dc=example,dc=com/dc=ldap-lab,dc=local/g" /etc/phpldapadmin/config.php
     fi
     if [ -f /etc/apache2/conf-available/phpldapadmin.conf ]; then
       sed -i 's/Require local/Require all granted/' /etc/apache2/conf-available/phpldapadmin.conf
@@ -400,6 +403,12 @@ runcmd:
     if [ -f "$PLA_DIR/functions.php" ]; then
       sed -i "s/ini_get('memory_limit') > -1/rtrim(ini_get('memory_limit'),'M') > -1/" "$PLA_DIR/functions.php"
       sed -i "s/ini_get('memory_limit') < \$config/rtrim(ini_get('memory_limit'),'M') < \$config/" "$PLA_DIR/functions.php"
+    fi
+    # 4) Fix is_resource() for PHP 8.1 (ldap_connect returns object, not resource)
+    if [ -f "$PLA_DIR/ds_ldap.php" ]; then
+      sed -i 's/! is_resource(\$resource)/! (is_resource(\$resource) || is_object(\$resource))/' "$PLA_DIR/ds_ldap.php"
+      sed -i 's/! is_resource(\$connect)/! (is_resource(\$connect) || is_object(\$connect))/' "$PLA_DIR/ds_ldap.php"
+      sed -i 's/is_resource(\$search)/is_resource(\$search) || is_object(\$search)/g' "$PLA_DIR/ds_ldap.php"
     fi
     systemctl restart apache2 || true
   - chown labuser:labuser /home/labuser/demo-setup.sh /home/labuser/demo-cleanup.sh
