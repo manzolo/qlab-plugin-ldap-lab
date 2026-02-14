@@ -386,10 +386,14 @@ runcmd:
     if [ -f /etc/apache2/conf-enabled/phpldapadmin.conf ]; then
       sed -i 's/Require local/Require all granted/' /etc/apache2/conf-enabled/phpldapadmin.conf
     fi
-    # Fix phpLDAPadmin template warning for PHP 8+
-    TEMPLATE_FILE="/usr/share/phpldapadmin/lib/TemplateRender.php"
-    if [ -f "$TEMPLATE_FILE" ]; then
-      sed -i "s/password_hash/password_hash_custom/" "$TEMPLATE_FILE"
+    # Fix phpLDAPadmin PHP 8.1 compatibility issues
+    # Suppress E_DEPRECATED warnings (trim(null), password_hash collision, etc.)
+    PHP_INI="/etc/php/8.1/apache2/conf.d/99-phpldapadmin-compat.ini"
+    echo "error_reporting = E_ALL & ~E_DEPRECATED" > "$PHP_INI"
+    # Fix password_hash() name collision with PHP built-in
+    PLA_TPL="/usr/share/phpldapadmin/lib/TemplateRender.php"
+    if [ -f "$PLA_TPL" ]; then
+      sed -i "s/password_hash/password_hash_custom/g" "$PLA_TPL"
     fi
     systemctl restart apache2 || true
   - chown labuser:labuser /home/labuser/demo-setup.sh /home/labuser/demo-cleanup.sh
