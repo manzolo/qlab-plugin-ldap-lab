@@ -175,7 +175,6 @@ write_files:
 
   - path: /home/labuser/demo-setup.sh
     permissions: '0755'
-    owner: labuser:labuser
     content: |
       #!/bin/bash
       # demo-setup.sh — Configure LDAP domain and create sample entries
@@ -325,7 +324,6 @@ write_files:
 
   - path: /home/labuser/demo-cleanup.sh
     permissions: '0755'
-    owner: labuser:labuser
     content: |
       #!/bin/bash
       # demo-cleanup.sh — Remove all LDAP entries and reset to empty state
@@ -394,6 +392,7 @@ runcmd:
       sed -i "s/password_hash/password_hash_custom/" "$TEMPLATE_FILE"
     fi
     systemctl restart apache2 || true
+  - chown labuser:labuser /home/labuser/demo-setup.sh /home/labuser/demo-cleanup.sh
   - chmod -x /etc/update-motd.d/*
   - sed -i 's/^#\?PrintMotd.*/PrintMotd yes/' /etc/ssh/sshd_config
   - sed -i 's/^session.*pam_motd.*/# &/' /etc/pam.d/sshd
