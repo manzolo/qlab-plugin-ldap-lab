@@ -387,13 +387,19 @@ runcmd:
       sed -i 's/Require local/Require all granted/' /etc/apache2/conf-enabled/phpldapadmin.conf
     fi
     # Fix phpLDAPadmin PHP 8.1 compatibility issues
-    # Suppress E_DEPRECATED warnings (trim(null), password_hash collision, etc.)
-    PHP_INI="/etc/php/8.1/apache2/conf.d/99-phpldapadmin-compat.ini"
-    echo "error_reporting = E_ALL & ~E_DEPRECATED" > "$PHP_INI"
-    # Fix password_hash() name collision with PHP built-in
-    PLA_TPL="/usr/share/phpldapadmin/lib/TemplateRender.php"
-    if [ -f "$PLA_TPL" ]; then
-      sed -i "s/password_hash/password_hash_custom/g" "$PLA_TPL"
+    PLA_DIR="/usr/share/phpldapadmin/lib"
+    # 1) Add E_DEPRECATED early return in custom error handler
+    if [ -f "$PLA_DIR/functions.php" ]; then
+      sed -i '/^function app_error_handler/a\\tif ($errno == E_DEPRECATED) return true;' "$PLA_DIR/functions.php"
+    fi
+    # 2) Fix password_hash() name collision with PHP built-in
+    if [ -f "$PLA_DIR/TemplateRender.php" ]; then
+      sed -i "s/password_hash/password_hash_custom/g" "$PLA_DIR/TemplateRender.php"
+    fi
+    # 3) Fix bogus "Memory Limit low" warning (string vs int comparison in PHP 8)
+    if [ -f "$PLA_DIR/functions.php" ]; then
+      sed -i "s/ini_get('memory_limit') > -1/rtrim(ini_get('memory_limit'),'M') > -1/" "$PLA_DIR/functions.php"
+      sed -i "s/ini_get('memory_limit') < \$config/rtrim(ini_get('memory_limit'),'M') < \$config/" "$PLA_DIR/functions.php"
     fi
     systemctl restart apache2 || true
   - chown labuser:labuser /home/labuser/demo-setup.sh /home/labuser/demo-cleanup.sh
