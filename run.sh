@@ -160,7 +160,7 @@ write_files:
           \033[0;32msudo dpkg-reconfigure slapd\033[0m             reconfigure domain
 
         \033[1;33mphpLDAPadmin:\033[0m
-          From host browser: \033[1;36mhttp://localhost:8080/phpldapadmin\033[0m
+          From host browser: run \033[1;36mqlab ports\033[0m to see the phpLDAPadmin URL
           Login DN: \033[0;32mcn=admin,dc=ldap-lab,dc=local\033[0m
           Password: \033[0;32m(set during demo-setup.sh or dpkg-reconfigure)\033[0m
 
@@ -312,7 +312,7 @@ write_files:
       echo "  Users: alice (alice123), bob (bob123), charlie (charlie123)"
       echo "  Group: developers (alice, bob, charlie)"
       echo ""
-      echo "  phpLDAPadmin: http://localhost:8080/phpldapadmin"
+      echo "  phpLDAPadmin: run 'qlab ports' on the host to see the URL"
       echo "  (from host browser, login with admin DN above)"
       echo ""
       echo "  Try from the client VM:"
@@ -583,6 +583,14 @@ start_vm_or_fail STARTED_VMS "$OVERLAY_SERVER" "$CIDATA_SERVER" "$MEMORY" "$SERV
     "-netdev" "socket,id=vlan1,mcast=${INTERNAL_MCAST}" \
     "-device" "virtio-net-pci,netdev=vlan1,mac=${SERVER_LAN_MAC}" || exit 1
 
+SERVER_SSH_PORT="$LAST_SSH_PORT"
+
+# Read the dynamically allocated HTTP port from .ports file
+HTTP_PORT=""
+if [[ -f "$STATE_DIR/${SERVER_VM}.ports" ]]; then
+    HTTP_PORT=$(grep ':80$' "$STATE_DIR/${SERVER_VM}.ports" | head -1 | cut -d: -f2)
+fi
+
 echo ""
 
 info "Starting $CLIENT_VM..."
@@ -602,7 +610,11 @@ echo "  LDAP Server VM:"
 echo "    SSH:           qlab shell $SERVER_VM"
 echo "    Log:           qlab log $SERVER_VM"
 echo "    Static IP:     $SERVER_INTERNAL_IP"
+if [[ -n "$HTTP_PORT" ]]; then
+echo "    phpLDAPadmin:  http://localhost:${HTTP_PORT}/phpldapadmin"
+else
 echo "    phpLDAPadmin:  check port with 'qlab ports'"
+fi
 echo ""
 echo "  LDAP Client VM:"
 echo "    SSH:           qlab shell $CLIENT_VM"
