@@ -14,10 +14,10 @@ A [QLab](https://github.com/manzolo/qlab) plugin that boots two virtual machines
 │                                            │
 │  ┌─────────────────┐  ┌─────────────────┐  │
 │  │ ldap-lab-server │  │ ldap-lab-client │  │
-│  │ SSH: 2242       │  │ SSH: 2243       │  │
+│  │ SSH: dynamic    │  │ SSH: dynamic    │  │
 │  │ 192.168.100.1   │◄─│ 192.168.100.2   │  │
 │  │ slapd + phpLDAP │  │ ldap-utils      │  │
-│  │ admin :8080     │  │                 │  │
+│  │ admin: dynamic  │  │                 │  │
 │  └─────────────────┘  └─────────────────┘  │
 │                                            │
 └────────────────────────────────────────────┘
@@ -54,8 +54,10 @@ LDAP admin (after running `demo-setup.sh`):
 
 | VM              | SSH (host) | Internal LAN IP        | Extra Ports          |
 |-----------------|------------|------------------------|----------------------|
-| ldap-lab-server | port 2242  | 192.168.100.1 (static) | 8080 (phpLDAPadmin)  |
-| ldap-lab-client | port 2243  | 192.168.100.2 (static) | —                    |
+| ldap-lab-server | dynamic    | 192.168.100.1 (static) | dynamic (phpLDAPadmin) |
+| ldap-lab-client | dynamic    | 192.168.100.2 (static) | —                      |
+
+> All host ports are dynamically allocated. Use `qlab ports` to see the actual mappings.
 
 The VMs are connected by a direct internal LAN (`192.168.100.0/24`) via QEMU socket networking.
 
@@ -82,8 +84,8 @@ qlab shell ldap-lab-client
 # Query the directory from the client
 ldapsearch -x -H ldap://192.168.100.1 -b "dc=ldap-lab,dc=local"
 
-# Access phpLDAPadmin from host browser
-# http://localhost:8080/phpldapadmin
+# Access phpLDAPadmin from host browser (check port with 'qlab ports')
+# http://localhost:<port>/phpldapadmin
 
 # Stop both VMs
 qlab stop ldap-lab
