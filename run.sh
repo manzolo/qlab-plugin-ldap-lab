@@ -6,8 +6,6 @@ set -euo pipefail
 PLUGIN_NAME="ldap-lab"
 SERVER_VM="ldap-lab-server"
 CLIENT_VM="ldap-lab-client"
-SERVER_SSH_PORT=2242
-CLIENT_SSH_PORT=2243
 
 # Internal LAN — direct VM-to-VM link via QEMU socket multicast
 INTERNAL_MCAST="230.0.0.1:10003"
@@ -27,12 +25,11 @@ echo ""
 echo "  This lab creates two VMs connected by an"
 echo "  internal LAN (192.168.100.0/24):"
 echo ""
-echo "    1. $SERVER_VM  (SSH port $SERVER_SSH_PORT)"
+echo "    1. $SERVER_VM"
 echo "       Static IP: $SERVER_INTERNAL_IP"
 echo "       Runs OpenLDAP (slapd) + phpLDAPadmin"
-echo "       phpLDAPadmin: http://localhost:8080/phpldapadmin"
 echo ""
-echo "    2. $CLIENT_VM  (SSH port $CLIENT_SSH_PORT)"
+echo "    2. $CLIENT_VM"
 echo "       Static IP: $CLIENT_INTERNAL_IP"
 echo "       LDAP client with ldap-utils"
 echo ""
@@ -574,18 +571,27 @@ echo ""
 info "Step 5: Starting VMs (internal LAN: 192.168.100.0/24)"
 echo ""
 
-info "Starting $SERVER_VM (SSH port $SERVER_SSH_PORT, phpLDAPadmin port 8080)..."
-start_vm "$OVERLAY_SERVER" "$CIDATA_SERVER" "$MEMORY" "$SERVER_VM" "$SERVER_SSH_PORT" \
-    "hostfwd=tcp::8080-:80" \
+# Multi-VM: resource check, cleanup trap, rollback on failure
+MEMORY_TOTAL=$(( MEMORY * 2 ))
+check_host_resources "$MEMORY_TOTAL" 2
+declare -a STARTED_VMS=()
+register_vm_cleanup STARTED_VMS
+
+info "Starting $SERVER_VM..."
+start_vm_or_fail STARTED_VMS "$OVERLAY_SERVER" "$CIDATA_SERVER" "$MEMORY" "$SERVER_VM" auto \
+    "hostfwd=tcp::0-:80" \
     "-netdev" "socket,id=vlan1,mcast=${INTERNAL_MCAST}" \
-    "-device" "virtio-net-pci,netdev=vlan1,mac=${SERVER_LAN_MAC}"
+    "-device" "virtio-net-pci,netdev=vlan1,mac=${SERVER_LAN_MAC}" || exit 1
 
 echo ""
 
-info "Starting $CLIENT_VM (SSH port $CLIENT_SSH_PORT)..."
-start_vm "$OVERLAY_CLIENT" "$CIDATA_CLIENT" "$MEMORY" "$CLIENT_VM" "$CLIENT_SSH_PORT" \
+info "Starting $CLIENT_VM..."
+start_vm_or_fail STARTED_VMS "$OVERLAY_CLIENT" "$CIDATA_CLIENT" "$MEMORY" "$CLIENT_VM" auto \
     "-netdev" "socket,id=vlan1,mcast=${INTERNAL_MCAST}" \
-    "-device" "virtio-net-pci,netdev=vlan1,mac=${CLIENT_LAN_MAC}"
+    "-device" "virtio-net-pci,netdev=vlan1,mac=${CLIENT_LAN_MAC}" || exit 1
+
+# Successful start — disable cleanup trap
+trap - EXIT
 
 echo ""
 echo "============================================="
@@ -596,7 +602,7 @@ echo "  LDAP Server VM:"
 echo "    SSH:           qlab shell $SERVER_VM"
 echo "    Log:           qlab log $SERVER_VM"
 echo "    Static IP:     $SERVER_INTERNAL_IP"
-echo "    phpLDAPadmin:  http://localhost:8080/phpldapadmin"
+echo "    phpLDAPadmin:  check port with 'qlab ports'"
 echo ""
 echo "  LDAP Client VM:"
 echo "    SSH:           qlab shell $CLIENT_VM"
