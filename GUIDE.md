@@ -36,9 +36,9 @@ Each VM has **two network interfaces**:
 ```
         Host Machine
        ┌────────────┐
-       │  SSH :2242  │──────► ldap-lab-server
-       │  SSH :2243  │──────► ldap-lab-client
-       │  Web :8080  │──────► phpLDAPadmin
+       │  SSH :auto  │──────► ldap-lab-server
+       │  SSH :auto  │──────► ldap-lab-client
+       │  Web :auto  │──────► phpLDAPadmin
        └────────────┘
 
    Internal LAN (192.168.100.0/24)
@@ -384,10 +384,10 @@ ldapsearch -x -H ldap://192.168.100.1 -D "cn=admin,dc=ldap-lab,dc=local" -w admi
 
 ### 6.1 Access phpLDAPadmin
 
-Open your host browser and go to:
+Run `qlab ports` on the host to find the phpLDAPadmin port, then open your browser:
 
 ```
-http://localhost:8080/phpldapadmin
+http://localhost:<port>/phpldapadmin
 ```
 
 ### 6.2 Login
