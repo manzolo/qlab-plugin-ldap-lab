@@ -97,7 +97,7 @@ qlab stop ldap-lab-client
 
 ## Exercises
 
-> **New to LDAP?** See the [Step-by-Step Guide](GUIDE.md) for complete walkthroughs with full config examples.
+> **New to LDAP?** See the [Step-by-Step Guide](guide.md) for complete walkthroughs with full config examples.
 
 | # | Exercise | What you'll do |
 |---|----------|----------------|
@@ -109,6 +109,17 @@ qlab stop ldap-lab-client
 | 6 | **phpLDAPadmin** | Browse and manage the directory via web interface |
 | 7 | **Modify and delete** | Use ldapmodify and ldapdelete to change entries |
 | 8 | **Reset and redo** | Clean up with demo-cleanup.sh and start over |
+
+## Automated Tests
+
+An automated test suite validates the exercises against running VMs:
+
+```bash
+# Start the lab first
+qlab run ldap-lab
+# Wait ~90s for cloud-init, then run all tests
+qlab test ldap-lab
+```
 
 ## Managing VMs
 
