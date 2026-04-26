@@ -112,6 +112,10 @@ packages:
   - net-tools
   - iputils-ping
   - tcpdump
+  - zsh
+  - vim
+  - nano
+  - fonts-powerline
 write_files:
   - path: /etc/profile.d/cloud-init-status.sh
     permissions: '0755'
@@ -370,6 +374,13 @@ write_files:
       echo "  Run 'bash ~/demo-setup.sh' to recreate everything."
       echo ""
 
+  - path: /tmp/setup-zsh.sh
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+      sed -i 's/^ZSH_THEME=.*/ZSH_THEME="agnoster"/' ~/.zshrc
+      sed -i 's/^plugins=(.*)/plugins=(git)/' ~/.zshrc
 runcmd:
   - netplan apply
   - |
@@ -415,6 +426,8 @@ runcmd:
   - printf '%b\n' "$(cat /etc/motd.raw)" > /etc/motd
   - rm -f /etc/motd.raw
   - systemctl restart sshd
+  - sudo -Hu labuser bash /tmp/setup-zsh.sh
+  - chsh -s /usr/bin/zsh labuser
   - echo "=== ldap-lab-server VM is ready! ==="
 USERDATA
 
@@ -448,6 +461,10 @@ packages:
   - nano
   - net-tools
   - iputils-ping
+  - zsh
+  - vim
+  - nano
+  - fonts-powerline
 write_files:
   - path: /etc/profile.d/cloud-init-status.sh
     permissions: '0755'
@@ -504,6 +521,13 @@ write_files:
       \033[1;36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m
 
 
+  - path: /tmp/setup-zsh.sh
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+      sed -i 's/^ZSH_THEME=.*/ZSH_THEME="agnoster"/' ~/.zshrc
+      sed -i 's/^plugins=(.*)/plugins=(git)/' ~/.zshrc
 runcmd:
   - netplan apply
   - chmod -x /etc/update-motd.d/*
@@ -512,6 +536,8 @@ runcmd:
   - printf '%b\n' "$(cat /etc/motd.raw)" > /etc/motd
   - rm -f /etc/motd.raw
   - systemctl restart sshd
+  - sudo -Hu labuser bash /tmp/setup-zsh.sh
+  - chsh -s /usr/bin/zsh labuser
   - echo "=== ldap-lab-client VM is ready! ==="
 USERDATA
 
