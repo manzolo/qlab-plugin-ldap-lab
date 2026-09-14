@@ -1,0 +1,4 @@
+directory reset for the exercises.
+dn:
+namingContexts: dc=ldap-lab,dc=local
+

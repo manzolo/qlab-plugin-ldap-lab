@@ -1,0 +1,6 @@
+active
+
+$ what the directory holds before exercise 1
+dn:
+namingContexts: dc=ldap-lab,dc=local
+

@@ -1,0 +1,5 @@
+$ the same query, from the other machine over the network
+dn: uid=alice,ou=users,dc=ldap-lab,dc=local
+cn: Alice Smith
+mail: alice@ldap-lab.local
+

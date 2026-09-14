@@ -1,0 +1,9 @@
+$ a group, and how membership is expressed
+dn: cn=developers,ou=groups,dc=ldap-lab,dc=local
+objectClass: posixGroup
+cn: developers
+gidNumber: 10000
+memberUid: alice
+memberUid: bob
+memberUid: charlie
+

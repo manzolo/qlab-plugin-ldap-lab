@@ -1,0 +1,16 @@
+$ one entry in full
+dn: uid=alice,ou=users,dc=ldap-lab,dc=local
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+uid: alice
+sn: Smith
+givenName: Alice
+cn: Alice Smith
+displayName: Alice Smith
+uidNumber: 10001
+gidNumber: 10000
+homeDirectory: /home/alice
+loginShell: /bin/bash
+mail: alice@ldap-lab.local
+

@@ -1,0 +1,70 @@
+# ldap-lab — what the walkthrough builder captures from a running lab.
+#
+# The lab boots with slapd running but empty (dc=nodomain). Exercise 1 of the
+# guide runs ~/demo-setup.sh to populate it, so this manifest does the same
+# before capturing anything, and tears it down again at the end.
+
+evidence:
+  - id: topology
+    cmd: |
+      echo '--- server ---'
+      qlab shell ldap-lab-server --no-wait -c 'ip -br addr | grep -vE "^lo"'
+      echo '--- client ---'
+      qlab shell ldap-lab-client --no-wait -c 'ip -br addr | grep -vE "^lo"'
+  - id: before
+    vm: ldap-lab-server
+    cmd: |
+      systemctl is-active slapd
+      echo
+      echo '$ what the directory holds before exercise 1'
+      ldapsearch -x -LLL -b "" -s base namingContexts
+  - id: setup
+    vm: ldap-lab-server
+    cmd: |
+      echo '$ bash ~/demo-setup.sh'
+      bash ~/demo-setup.sh 2>&1 | tail -12
+  - id: tree
+    vm: ldap-lab-server
+    cmd: |
+      echo '$ the whole directory, as a tree of distinguished names'
+      ldapsearch -x -LLL -b dc=ldap-lab,dc=local dn 2>/dev/null
+  - id: entry
+    vm: ldap-lab-server
+    cmd: |
+      echo '$ one entry in full'
+      ldapsearch -x -LLL -b dc=ldap-lab,dc=local "(uid=alice)" 2>/dev/null
+  - id: group
+    vm: ldap-lab-server
+    cmd: |
+      echo '$ a group, and how membership is expressed'
+      ldapsearch -x -LLL -b dc=ldap-lab,dc=local "(objectClass=posixGroup)" 2>/dev/null
+  - id: filters
+    vm: ldap-lab-server
+    cmd: |
+      echo '$ (uid=*)                      every entry that has a uid'
+      ldapsearch -x -LLL -b dc=ldap-lab,dc=local "(uid=*)" uid 2>/dev/null | grep ^uid
+      echo
+      echo '$ (&(objectClass=posixAccount)(uidNumber>=1002))    AND, with a range'
+      ldapsearch -x -LLL -b dc=ldap-lab,dc=local "(&(objectClass=posixAccount)(uidNumber>=1002))" uid uidNumber 2>/dev/null | grep -E '^uid'
+      echo
+      echo '$ (|(uid=alice)(uid=bob))      OR'
+      ldapsearch -x -LLL -b dc=ldap-lab,dc=local "(|(uid=alice)(uid=bob))" uid 2>/dev/null | grep ^uid
+  - id: from-the-client
+    vm: ldap-lab-client
+    cmd: |
+      echo '$ the same query, from the other machine over the network'
+      ldapsearch -x -H ldap://192.168.100.1 -LLL -b dc=ldap-lab,dc=local "(uid=alice)" cn mail 2>&1 | head -8
+  - id: bind
+    vm: ldap-lab-client
+    cmd: |
+      echo '$ anonymous bind  (-x, no credentials)'
+      ldapsearch -x -H ldap://192.168.100.1 -LLL -b dc=ldap-lab,dc=local "(uid=alice)" userPassword 2>&1 | head -4
+      echo
+      echo '$ authenticated bind as the directory manager'
+      ldapsearch -x -H ldap://192.168.100.1 -D "cn=admin,dc=ldap-lab,dc=local" -w admin -LLL \
+        -b dc=ldap-lab,dc=local "(uid=alice)" userPassword 2>&1 | head -4
+  - id: teardown
+    vm: ldap-lab-server
+    cmd: 'bash ~/demo-cleanup.sh >/dev/null 2>&1 || true; echo "directory reset for the exercises."; ldapsearch -x -LLL -b "" -s base namingContexts'
+  - id: qlab-test
+    cmd: qlab test ldap-lab 2>&1 || true

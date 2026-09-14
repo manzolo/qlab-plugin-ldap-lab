@@ -1,0 +1,83 @@
+[INFO] Running tests for plugin 'ldap-lab'...
+
+
+=========================================
+  ldap-lab — Automated Test Suite
+=========================================
+
+  [INFO] Server port: 2225
+  [INFO] Client port: 2229
+  [INFO] HTTP port: 2226
+  [PASS] Server VM reachable
+  [PASS] Client VM reachable
+  [PASS] Server cloud-init done
+  [PASS] Client cloud-init done
+
+Exercise 1 — LDAP Anatomy
+
+  [PASS] slapd is active
+  [PASS] Port 389 listening
+  [PASS] ldapsearch on server
+  [PASS] ldapsearch on client
+  [PASS] demo-setup.sh exists
+  [PASS] demo-cleanup.sh exists
+  [PASS] Base DN exists after setup
+
+  Exercise 1: All 7 checks passed
+
+Exercise 2 — LDAP Searching
+
+  [PASS] Can search all entries
+  [PASS] Found alice
+  [PASS] Alice has email
+  [PASS] Found users OU
+  [PASS] Client can query server
+  [PASS] Found developers group
+
+  Exercise 2: All 6 checks passed
+
+Exercise 3 — LDIF Operations
+
+  [PASS] testuser added
+  [PASS] testuser modified
+  [PASS] testuser deleted
+
+  Exercise 3: All 3 checks passed
+
+Exercise 4 — Groups
+
+  [PASS] developers group exists
+  [PASS] alice is a member
+  [PASS] bob is a member
+  [PASS] ou=users exists
+  [PASS] ou=groups exists
+
+  Exercise 4: All 5 checks passed
+
+Exercise 5 — Authentication
+
+  [PASS] Admin can authenticate
+  [PASS] slapcat dumps directory
+  [PASS] Anonymous search finds alice
+
+  Exercise 5: All 3 checks passed
+
+Exercise 6 — phpLDAPadmin
+
+  [PASS] Apache is active
+  [PASS] Port 80 listening
+  [PASS] phpLDAPadmin accessible
+  [PASS] phpLDAPadmin via host port
+
+  Exercise 6: All 4 checks passed
+
+=========================================
+  Final Report
+=========================================
+
+  Exercises run:     6
+  Exercises passed:  6
+  Exercises failed:  0
+  Exercises skipped: 0
+
+  All exercises passed!

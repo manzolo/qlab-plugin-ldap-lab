@@ -1,0 +1,16 @@
+$ (uid=*)                      every entry that has a uid
+uid: alice
+uid: bob
+uid: charlie
+
+$ (&(objectClass=posixAccount)(uidNumber>=1002))    AND, with a range
+uid: alice
+uidNumber: 10001
+uid: bob
+uidNumber: 10002
+uid: charlie
+uidNumber: 10003
+
+$ (|(uid=alice)(uid=bob))      OR
+uid: alice
+uid: bob

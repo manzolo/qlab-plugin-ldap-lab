@@ -1,0 +1,15 @@
+$ the whole directory, as a tree of distinguished names
+dn: dc=ldap-lab,dc=local
+
+dn: ou=users,dc=ldap-lab,dc=local
+
+dn: ou=groups,dc=ldap-lab,dc=local
+
+dn: uid=alice,ou=users,dc=ldap-lab,dc=local
+
+dn: uid=bob,ou=users,dc=ldap-lab,dc=local
+
+dn: uid=charlie,ou=users,dc=ldap-lab,dc=local
+
+dn: cn=developers,ou=groups,dc=ldap-lab,dc=local
+

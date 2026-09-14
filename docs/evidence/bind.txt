@@ -1,0 +1,8 @@
+$ anonymous bind  (-x, no credentials)
+dn: uid=alice,ou=users,dc=ldap-lab,dc=local
+
+
+$ authenticated bind as the directory manager
+dn: uid=alice,ou=users,dc=ldap-lab,dc=local
+userPassword:: e1NTSEF9THA2NFRiZ204WDU3R1grZWs1a3B4dno3OTg3ZFQwQW0=
+

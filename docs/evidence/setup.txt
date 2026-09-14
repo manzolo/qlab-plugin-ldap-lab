@@ -1,0 +1,13 @@
+$ bash ~/demo-setup.sh
+  Admin DN:       cn=admin,dc=ldap-lab,dc=local
+  Admin password: admin
+
+  Users: alice (alice123), bob (bob123), charlie (charlie123)
+  Group: developers (alice, bob, charlie)
+
+  phpLDAPadmin: run 'qlab ports' on the host to see the URL
+  (from host browser, login with admin DN above)
+
+  Try from the client VM:
+    ldapsearch -x -H ldap://192.168.100.1 -b "dc=ldap-lab,dc=local" "(uid=alice)"
+
